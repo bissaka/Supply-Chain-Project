@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Supply Chain Tracker</title>
+  </head>
+  <body>
+    <h1>Supply Chain DApp Interface</h1>
+
+    <section id="addProduct">
+      <h2>Add New Product</h2>
+      <input type="number" id="newProductId" placeholder="Product ID" />
+      <input
+        type="text"
+        id="newProductOwner"
+        placeholder="Owner Address (0x...)"
+      />
+      <button onclick="addProduct()">Add Product</button>
+    </section>
+
+    <section id="transferProduct">
+      <h2>Transfer Product Ownership</h2>
+      <input type="number" id="transferProductId" placeholder="Product ID" />
+      <input
+        type="text"
+        id="transferNewOwner"
+        placeholder="New Owner Address"
+      />
+      <button onclick="transferProduct()">Transfer Ownership</button>
+    </section>
+
+    <section id="updateStatus">
+      <h2>Update Product Status</h2>
+      <input type="number" id="statusProductId" placeholder="Product ID" />
+      <select id="newStatus">
+        <option value="InTransit">In Transit</option>
+        <option value="Delivered">Delivered</option>
+      </select>
+      <button onclick="updateStatus()">Update Status</button>
+    </section>
+
+    <section id="viewProduct">
+      <h2>View Product Info</h2>
+      <input type="number" id="viewProductId" placeholder="Product ID" />
+      <button onclick="viewProduct()">View Product</button>
+      <pre id="productInfo"></pre>
+    </section>
+
+    <script>
+      const apiBaseUrl =
+        "https://x2buxwq353.execute-api.us-east-1.amazonaws.com/prod"; // Replace with the actual API Gateway endpoint
+
+      async function addProduct() {
+        const id = document.getElementById("newProductId").value;
+        const owner = document.getElementById("newProductOwner").value;
+        const payload = { id: parseInt(id), owner: owner };
+        try {
+          let res = await fetch(`${apiBaseUrl}/product`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          let data = await res.json();
+          alert(data.message || JSON.stringify(data));
+        } catch (err) {
+          // console.error(err);
+          // alert("Error adding product");
+          console.error("Error adding product:", err);
+          alert(`Error adding product: ${err.message}`);
+        }
+      }
+
+      async function transferProduct() {
+        const id = document.getElementById("transferProductId").value;
+        const newOwner = document.getElementById("transferNewOwner").value;
+        const payload = { newOwner: newOwner };
+        try {
+          let res = await fetch(`${apiBaseUrl}/product/${id}/transfer`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          let data = await res.json();
+          alert(data.message || JSON.stringify(data));
+        } catch (err) {
+          console.error(err);
+          alert("Error transferring product");
+        }
+      }
+
+      async function updateStatus() {
+        const id = document.getElementById("statusProductId").value;
+        const status = document.getElementById("newStatus").value;
+        const payload = { status: status };
+        try {
+          let res = await fetch(`${apiBaseUrl}/product/${id}/status`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          let data = await res.json();
+          alert(data.message || JSON.stringify(data));
+        } catch (err) {
+          console.error(err);
+          alert("Error updating status");
+        }
+      }
+
+      async function viewProduct() {
+        const id = document.getElementById("viewProductId").value;
+        try {
+          let res = await fetch(`${apiBaseUrl}/product/${id}`);
+          let data = await res.json();
+          document.getElementById("productInfo").innerText = JSON.stringify(
+            data,
+            null,
+            2
+          );
+        } catch (err) {
+          console.error(err);
+          alert("Error fetching product info");
+        }
+      }
+    </script>
+  </body>
+</html>
